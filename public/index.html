@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оленевка.Тур — бронирование с выбором гостей</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+        }
+        body {
+            background-color: #f0f7ff;
+            color: #1a2b3c;
+        }
+        /* Шапка */
+        .header {
+            background: white;
+            border-bottom: 1px solid #cde0ed;
+            padding: 12px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            position: relative;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0066b3;
+            cursor: pointer;
+        }
+        .logo span {
+            color: #f5a31a;
+        }
+        .city-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #eef3f9;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .city-dropdown {
+            position: absolute;
+            top: 70px;
+            left: 120px;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 2000;
+            display: none;
+            border: 2px solid #0066b3;
+        }
+        .city-dropdown input {
+            width: 100%;
+            padding: 15px 20px;
+            border: none;
+            border-bottom: 2px solid #cde0ed;
+            font-size: 1rem;
+            outline: none;
+            border-radius: 30px 30px 0 0;
+        }
+        .city-list {
+            list-style: none;
+            padding: 10px 0;
+        }
+        .city-list li {
+            padding: 12px 20px;
+            cursor: pointer;
+        }
+        .city-list li:hover {
+            background: #eef3f9;
+        }
+        .city-list li.selected {
+            background: #0066b3;
+            color: white;
+        }
+        .nav {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+        .nav a {
+            cursor: pointer;
+            color: #2c3e50;
+            text-decoration: none;
+        }
+        .login-btn {
+            border: 2px solid #0066b3;
+            padding: 8px 24px;
+            border-radius: 40px;
+            background: white;
+            color: #0066b3;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .login-btn:hover {
+            background: #0066b3;
+            color: white;
+        }
+        /* Поиск */
+        .hero {
+            background: linear-gradient(145deg, #043d54, #11698b);
+            margin: 20px 40px 30px;
+            padding: 40px 30px;
+            border-radius: 60px;
+            color: white;
+        }
+        .hero h1 {
+            font-size: 2.2rem;
+            margin-bottom: 25px;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            background: rgba(255,255,255,0.2);
+            padding: 10px 28px;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+        .tab.active {
+            background: white;
+            color: #043d54;
+            font-weight: 600;
+        }
+        .search-form {
+            background: white;
+            border-radius: 100px;
+            display: flex;
+            flex-wrap: wrap;
+            padding: 6px;
+        }
+        .search-field {
+            flex: 1 1 180px;
+            padding: 16px 22px;
+            border: none;
+            border-right: 2px solid #dde9f2;
+            background: transparent;
+            font-size: 1rem;
+        }
+        .search-field:focus {
+            outline: none;
+        }
+        .search-btn {
+            background: #f5a31a;
+            border: none;
+            border-radius: 60px;
+            padding: 14px 40px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        /* Календарь */
+        .calendar-container {
+            position: relative;
+            flex: 1 1 180px;
+        }
+        #searchDates {
+            width: 100%;
+            cursor: pointer;
+        }
+        .calendar-popup {
+            position: absolute;
+            top: 70px;
+            left: 0;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            padding: 25px;
+            z-index: 1000;
+            width: 700px;
+            max-width: 90vw;
+            border: 2px solid #0066b3;
+            display: none;
+            color: #1a2b3c;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .calendar-month {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0066b3;
+        }
+        .calendar-nav button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #eef3f9;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        .two-months {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .month {
+            flex: 1;
+            min-width: 250px;
+        }
+        .month table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+        .month th {
+            color: #0066b3;
+            padding: 10px 5px;
+        }
+        .month td {
+            padding: 10px 5px;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+        .month td:hover {
+            background: #e1effa;
+        }
+        .month td.selected {
+            background: #0066b3;
+            color: white;
+        }
+        .month td.range {
+            background: #c2e0ff;
+        }
+        .calendar-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .apply-btn {
+            background: #f5a31a;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        /* Селектор гостей */
+        .guests-selector {
+            position: relative;
+            flex: 1 1 180px;
+        }
+        #searchGuests {
+            width: 100%;
+            cursor: pointer;
+            background: white;
+            text-align: left;
+        }
+        .guests-dropdown {
+            position: absolute;
+            top: 70px;
+            left: 0;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            width: 280px;
+            z-index: 1000;
+            display: none;
+            border: 2px solid #0066b3;
+            padding: 20px;
+            color: #1a2b3c;
+        }
+        .guest-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .guest-label {
+            font-weight: 600;
+        }
+        .guest-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .guest-controls button {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid #0066b3;
+            background: white;
+            color: #0066b3;
+            font-size: 1.3rem;
+            cursor: pointer;
+        }
+        .guest-controls button:hover {
+            background: #0066b3;
+            color: white;
+        }
+        .guest-count {
+            font-weight: 700;
+            min-width: 25px;
+            text-align: center;
+        }
+        .child-age {
+            margin-left: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .child-age select {
+            padding: 8px;
+            border-radius: 30px;
+            border: 2px solid #cde0ed;
+        }
+        .guests-done {
+            background: #f5a31a;
+            border: none;
+            padding: 14px;
+            width: 100%;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        /* Контент */
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 40px 0 20px;
+        }
+        .section-header h2 {
+            font-size: 2rem;
+            color: #043d54;
+        }
+        .grid-4, .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: white;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,45,70,0.1);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,60,90,0.2);
+        }
+        .card-img {
+            height: 160px;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: flex-end;
+            padding: 15px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.3rem;
+            text-shadow: 0 2px 8px black;
+        }
+        .img1 { background-image: linear-gradient(0deg, #002a40aa, #002a40aa), url('https://images.unsplash.com/photo-1590523277543-a94c2e4ebc5c?w=600'); }
+        .img2 { background-image: linear-gradient(0deg, #002a40aa, #002a40aa), url('https://images.unsplash.com/photo-1551634979-2b11f8c946fe?w=600'); }
+        .img3 { background-image: linear-gradient(0deg, #002a40aa, #002a40aa), url('https://images.unsplash.com/photo-1544642899-f0d6e5f6ed6f?w=600'); }
+        .img4 { background-image: linear-gradient(0deg, #002a40aa, #002a40aa), url('https://images.unsplash.com/photo-1596733430284-f7437764b1a9?w=600'); }
+        .img5 { background-image: linear-gradient(0deg, #002a40aa, #002a40aa), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600'); }
+        .img6 { background-image: linear-gradient(0deg, #002a40aa, #002a40aa), url('https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=600'); }
+        .img7 { background-image: linear-gradient(0deg, #002a40aa, #002a40aa), url('https://images.unsplash.com/photo-1570213489059-0aac6626cade?w=600'); }
+        .card-content {
+            padding: 15px;
+        }
+        .price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #0066b3;
+            margin-top: 10px;
+        }
+        /* Страница бронирования */
+        .booking-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+        .booking-card {
+            background: white;
+            border-radius: 60px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+        }
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .booking-header h2 {
+            color: #0066b3;
+            font-size: 2rem;
+        }
+        .booking-close {
+            font-size: 40px;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .booking-dates {
+            display: flex;
+            gap: 15px;
+            margin: 25px 0;
+        }
+        .booking-dates input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #cde0ed;
+            border-radius: 60px;
+            font-size: 1rem;
+            text-align: center;
+        }
+        .booking-total {
+            background: #eef3f9;
+            padding: 20px;
+            border-radius: 40px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        .booking-total .price {
+            font-size: 2rem;
+        }
+        .booking-btn {
+            background: #f5a31a;
+            border: none;
+            padding: 18px;
+            width: 100%;
+            border-radius: 60px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .booking-btn:hover {
+            background: #ffb73d;
+        }
+        .booking-note {
+            margin-top: 15px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        /* Футер */
+        .footer {
+            background: #022b38;
+            color: #b7d9ed;
+            padding: 40px 40px 20px;
+            margin-top: 60px;
+        }
+        .footer-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .footer a {
+            color: #9bc9e5;
+            display: block;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #1c5068;
+        }
+        /* Модалка */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,20,40,0.8);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-card {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 60px;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 15px; right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+        }
+        /* Тост */
+        .toast {
+            visibility: hidden;
+            background: #0066b3;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 60px;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: 0.3s;
+            opacity: 0;
+            z-index: 4000;
+            white-space: nowrap;
+        }
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Шапка -->
+    <div class="header">
+        <div style="display: flex; align-items: center; gap: 30px; position: relative;">
+            <div class="logo" id="logoHome">Оленевка<span>.Тур</span></div>
+            <div class="city-selector" id="citySelector">📍 Москва ▼</div>
+            <div class="city-dropdown" id="cityDropdown">
+                <input type="text" id="citySearch" placeholder="Поиск города...">
+                <ul class="city-list" id="cityList"></ul>
+            </div>
+        </div>
+        <div class="nav">
+            <a id="navTours">Туры</a>
+            <a id="navHotels">Отели</a>
+            <a id="navReviews">Отзывы</a>
+            <a id="navAbout">О районе</a>
+            <button class="login-btn" id="loginBtn">Войти</button>
+        </div>
+    </div>
+
+    <!-- Поиск -->
+    <div class="hero">
+        <h1>Найдем лучший отдых в Оленевке</h1>
+        <div class="tabs">
+            <span class="tab active" id="tabHotels">Отели</span>
+            <span class="tab" id="tabTours">Туры</span>
+            <span class="tab" id="tabFlights">Авиабилеты</span>
+        </div>
+        <div class="search-form">
+            <input class="search-field" type="text" placeholder="Курорт, отель" value="Оленевка" id="searchDestination">
+            <div class="calendar-container">
+                <input class="search-field" type="text" id="searchDates" placeholder="Даты" value="17.06 — 24.06" readonly>
+                <div class="calendar-popup" id="calendarPopup">
+                    <div class="calendar-header">
+                        <span class="calendar-month" id="currentMonthYear">Июнь 2026</span>
+                        <div class="calendar-nav">
+                            <button id="prevMonth">←</button>
+                            <button id="nextMonth">→</button>
+                        </div>
+                    </div>
+                    <div class="two-months" id="twoMonths"></div>
+                    <div class="calendar-footer">
+                        <span id="selectedDatesLabel">даты не выбраны</span>
+                        <button class="apply-btn" id="applyDates">Применить</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Селектор гостей -->
+            <div class="guests-selector">
+                <input class="search-field" type="text" id="searchGuests" placeholder="Гости" value="2 взрослых" readonly>
+                <div class="guests-dropdown" id="guestsDropdown">
+                    <div class="guest-row">
+                        <span class="guest-label">Взрослые</span>
+                        <div class="guest-controls">
+                            <button id="adultMinus">−</button>
+                            <span class="guest-count" id="adultCount">2</span>
+                            <button id="adultPlus">+</button>
+                        </div>
+                    </div>
+                    <div class="guest-row">
+                        <span class="guest-label">Дети</span>
+                        <div class="guest-controls">
+                            <button id="childMinus">−</button>
+                            <span class="guest-count" id="childCount">0</span>
+                            <button id="childPlus">+</button>
+                        </div>
+                    </div>
+                    <div id="childAges" style="display: none;"></div>
+                    <button class="guests-done" id="guestsDone">Применить</button>
+                </div>
+            </div>
+            
+            <button class="search-btn" id="searchBtn">Найти</button>
+        </div>
+    </div>
+
+    <!-- Контент -->
+    <div class="container">
+        <!-- Популярные места -->
+        <div class="section-header">
+            <h2>🔥 Популярные места</h2>
+            <span class="all-link" id="allPlacesLink">все 26 →</span>
+        </div>
+        <div class="grid-4" id="placesGrid">
+            <div class="card place-card" data-name="Тарханкут" data-price="500" data-type="place">
+                <div class="card-img img1">Тарханкут</div>
+                <div class="card-content">
+                    <div>мыс, маяк, гроты</div>
+                    <div class="price">от 500 ₽</div>
+                </div>
+            </div>
+            <div class="card place-card" data-name="Чаша любви" data-price="0" data-type="place">
+                <div class="card-img img2">Чаша любви</div>
+                <div class="card-content">
+                    <div>природный бассейн</div>
+                    <div class="price">бесплатно</div>
+                </div>
+            </div>
+            <div class="card place-card" data-name="Аллея вождей" data-price="2500" data-type="place">
+                <div class="card-img img3">Аллея вождей</div>
+                <div class="card-content">
+                    <div>подводный музей</div>
+                    <div class="price">дайвинг 2500 ₽</div>
+                </div>
+            </div>
+            <div class="card place-card" data-name="Атлеш" data-price="800" data-type="place">
+                <div class="card-img img4">Атлеш</div>
+                <div class="card-content">
+                    <div>скалы, дельфины</div>
+                    <div class="price">экскурсии 800 ₽</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Лучшие отели -->
+        <div class="section-header">
+            <h2>🏨 Лучшие отели</h2>
+            <span class="all-link" id="allHotelsLink">смотреть 78 →</span>
+        </div>
+        <div class="grid-3" id="hotelsGrid">
+            <div class="card hotel-card" data-name="Оленевка Village" data-price="500" data-type="hotel">
+                <div class="card-img img5">Village</div>
+                <div class="card-content">
+                    <div>Оленевка Village</div>
+                    <div>★★★★☆ 4.5</div>
+                    <div class="price">от 500 ₽/сутки</div>
+                </div>
+            </div>
+            <div class="card hotel-card" data-name="Гостевой дом «Клевер»" data-price="800" data-type="hotel">
+                <div class="card-img img6">Клевер</div>
+                <div class="card-content">
+                    <div>Гостевой дом «Клевер»</div>
+                    <div>★★★★★ 5.0</div>
+                    <div class="price">от 800 ₽/сутки</div>
+                </div>
+            </div>
+            <div class="card hotel-card" data-name="Парк-отель «Тарханкут»" data-price="2500" data-type="hotel">
+                <div class="card-img img7">Тарханкут</div>
+                <div class="card-content">
+                    <div>Парк-отель «Тарханкут»</div>
+                    <div>★★★★ 4.2</div>
+                    <div class="price">от 2500 ₽/сутки</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Футер -->
+    <div class="footer">
+        <div class="footer-links">
+            <div><b>О проекте</b><a id="footerAbout">О нас</a><a id="footerAds">Реклама</a><a id="footerPartners">Партнерам</a></div>
+            <div><b>Путешествия</b><a id="footerCountries">Страны</a><a id="footerHotels">Отели</a><a id="footerTours">Экскурсии</a></div>
+            <div><b>Помощь</b><a id="footerFaq">Вопрос-ответ</a><a id="footerSupport">Поддержка</a><a id="footerRules">Правила</a></div>
+        </div>
+        <div class="copyright">© 2026 Оленевка.Тур — бронируйте отдых в Крыму</div>
+    </div>
+
+    <!-- Страница бронирования -->
+    <div class="booking-page" id="bookingPage">
+        <div class="booking-card">
+            <div class="booking-header">
+                <h2 id="bookingTitle">Бронирование</h2>
+                <span class="booking-close" id="bookingClose">&times;</span>
+            </div>
+            <div id="bookingDetails"></div>
+            <div class="booking-dates">
+                <input type="text" id="bookingCheckIn" placeholder="Заезд" value="17.06.2026" readonly>
+                <input type="text" id="bookingCheckOut" placeholder="Выезд" value="24.06.2026" readonly>
+            </div>
+            <div class="booking-total">
+                <div>Итого:</div>
+                <div class="price" id="bookingTotalPrice">0 ₽</div>
+            </div>
+            <button class="booking-btn" id="bookingConfirm">Подтвердить бронирование</button>
+            <div class="booking-note">* Бесплатная отмена за 3 дня до заезда</div>
+        </div>
+    </div>
+
+    <!-- Модалка и тост -->
+    <div class="modal" id="modal">
+        <div class="modal-card">
+            <span class="modal-close" id="modalClose">&times;</span>
+            <h2 id="modalTitle" style="color:#0066b3; margin-bottom:15px;">Заголовок</h2>
+            <p id="modalText" style="margin-bottom:25px;">текст</p>
+            <button style="background:#0066b3; color:white; border:none; padding:12px 30px; border-radius:60px; font-weight:bold; cursor:pointer;" id="modalOk">OK</button>
+        </div>
+    </div>
+    <div class="toast" id="toast">✅ Готово</div>
+
+    <script>
+        (function() {
+            // ===== МОДАЛКА =====
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalText = document.getElementById('modalText');
+            const modalClose = document.getElementById('modalClose');
+            const modalOk = document.getElementById('modalOk');
+            const toast = document.getElementById('toast');
+
+            function showModal(title, text) {
+                modalTitle.innerText = title;
+                modalText.innerText = text;
+                modal.style.display = 'flex';
+            }
+            function closeModal() { modal.style.display = 'none'; }
+            function showToast(msg) {
+                toast.innerText = msg;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            }
+            modalClose.addEventListener('click', closeModal);
+            modalOk.addEventListener('click', closeModal);
+            window.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+            // ===== ГОРОДА =====
+            const cities = ["Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург", "Казань", "Нижний Новгород", "Красноярск", "Челябинск", "Самара", "Уфа", "Ростов-на-Дону", "Краснодар", "Омск", "Воронеж", "Пермь", "Волгоград", "Саратов", "Тюмень", "Тольятти", "Барнаул", "Ижевск", "Махачкала", "Хабаровск", "Ульяновск", "Иркутск", "Владивосток", "Ярославль", "Кемерово", "Томск", "Оренбург", "Рязань", "Астрахань", "Пенза", "Киров", "Чебоксары", "Калининград", "Брянск", "Курск", "Иваново", "Магнитогорск", "Тверь", "Ставрополь", "Симферополь", "Севастополь", "Архангельск", "Чита", "Суздаль", "Владимир", "Смоленск", "Мурманск", "Петрозаводск", "Йошкар-Ола", "Саранск", "Вологда", "Кострома", "Тамбов", "Липецк", "Белгород", "Калуга", "Орёл", "Псков", "Новгород Великий", "Сыктывкар", "Нарьян-Мар", "Салехард", "Ханты-Мансийск", "Горно-Алтайск", "Кызыл", "Абакан", "Улан-Удэ", "Элиста", "Черкесск", "Нальчик", "Владикавказ", "Грозный", "Магас", "Назрань", "Майкоп", "Бийск", "Рубцовск", "Каменск-Уральский", "Тагил", "Златоуст", "Миасс", "Копейск", "Березники", "Соликамск", "Чайковский", "Кунгур", "Лысьва", "Оленёк"].sort();
+
+            const citySelector = document.getElementById('citySelector');
+            const cityDropdown = document.getElementById('cityDropdown');
+            const citySearch = document.getElementById('citySearch');
+            const cityList = document.getElementById('cityList');
+            let selectedCity = 'Москва';
+
+            function renderCities(filter = '') {
+                cityList.innerHTML = '';
+                const filtered = cities.filter(c => c.toLowerCase().includes(filter.toLowerCase()));
+                filtered.forEach(city => {
+                    const li = document.createElement('li');
+                    li.textContent = city;
+                    if (city === selectedCity) li.classList.add('selected');
+                    li.addEventListener('click', () => {
+                        selectedCity = city;
+                        citySelector.innerHTML = `📍 ${city} ▼`;
+                        cityDropdown.style.display = 'none';
+                        showToast(`Город: ${city}`);
+                    });
+                    cityList.appendChild(li);
+                });
+            }
+            renderCities();
+
+            citySelector.addEventListener('click', (e) => {
+                e.stopPropagation();
+                cityDropdown.style.display = 'block';
+                citySearch.value = '';
+                citySearch.focus();
+                renderCities();
+            });
+
+            citySearch.addEventListener('input', () => renderCities(citySearch.value));
+            document.addEventListener('click', (e) => {
+                if (!cityDropdown.contains(e.target) && e.target !== citySelector) {
+                    cityDropdown.style.display = 'none';
+                }
+            });
+
+            // ===== КАЛЕНДАРЬ =====
+            const searchDates = document.getElementById('searchDates');
+            const calendarPopup = document.getElementById('calendarPopup');
+            const twoMonths = document.getElementById('twoMonths');
+            const monthYearSpan = document.getElementById('currentMonthYear');
+            const prevBtn = document.getElementById('prevMonth');
+            const nextBtn = document.getElementById('nextMonth');
+            const applyBtn = document.getElementById('applyDates');
+            const selectedLabel = document.getElementById('selectedDatesLabel');
+            const bookingCheckIn = document.getElementById('bookingCheckIn');
+            const bookingCheckOut = document.getElementById('bookingCheckOut');
+
+            let currentDate = new Date(2026, 5, 1);
+            let checkIn = null;
+            let checkOut = null;
+
+            function formatShort(d) {
+                let day = d.getDate().toString().padStart(2, '0');
+                let month = (d.getMonth() + 1).toString().padStart(2, '0');
+                let year = d.getFullYear();
+                return day + '.' + month + '.' + year;
+            }
+
+            function formatMonthYear(date) {
+                return date.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+            }
+
+            function renderCalendar() {
+                const y = currentDate.getFullYear();
+                const m = currentDate.getMonth();
+                const month1 = new Date(y, m, 1);
+                const month2 = new Date(y, m + 1, 1);
+                monthYearSpan.innerText = formatMonthYear(month1) + ' — ' + formatMonthYear(month2);
+
+                let html = '';
+                [month1, month2].forEach(month => {
+                    const year = month.getFullYear();
+                    const monthIndex = month.getMonth();
+                    const firstDay = new Date(year, monthIndex, 1);
+                    const lastDay = new Date(year, monthIndex + 1, 0);
+                    const startOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+                    
+                    let table = '<table><thead><tr><th colspan="7">' + month.toLocaleDateString('ru-RU', { month: 'long' }) + '</th></tr><tr><th>Пн</th><th>Вт</th><th>Ср</th><th>Чт</th><th>Пт</th><th>Сб</th><th>Вс</th></tr></thead><tbody><tr>';
+                    for (let i = 0; i < startOffset; i++) table += '<td></td>';
+                    for (let d = 1; d <= lastDay.getDate(); d++) {
+                        const cellDate = new Date(year, monthIndex, d);
+                        let classes = '';
+                        if (checkIn && cellDate.toDateString() === checkIn.toDateString()) classes = 'selected';
+                        if (checkOut && cellDate.toDateString() === checkOut.toDateString()) classes = 'selected';
+                        if (checkIn && checkOut && cellDate > checkIn && cellDate < checkOut) classes = 'range';
+                        table += '<td class="' + classes + '" data-date="' + cellDate.toISOString() + '">' + d + '</td>';
+                        if ((startOffset + d) % 7 === 0) table += '</tr><tr>';
+                    }
+                    table += '</tr></tbody></table>';
+                    html += '<div class="month">' + table + '</div>';
+                });
+                twoMonths.innerHTML = html;
+
+                document.querySelectorAll('.month td[data-date]').forEach(td => {
+                    td.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const clicked = new Date(this.dataset.date);
+                        if (!checkIn || (checkIn && checkOut)) {
+                            checkIn = clicked;
+                            checkOut = null;
+                        } else if (clicked > checkIn) {
+                            checkOut = clicked;
+                        } else {
+                            checkIn = clicked;
+                            checkOut = null;
+                        }
+                        renderCalendar();
+                        updateSelectedLabel();
+                    });
+                });
+            }
+
+            function updateSelectedLabel() {
+                if (checkIn && checkOut) {
+                    selectedLabel.innerText = checkIn.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }) + ' — ' + checkOut.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+                    bookingCheckIn.value = formatShort(checkIn);
+                    bookingCheckOut.value = formatShort(checkOut);
+                } else if (checkIn) {
+                    selectedLabel.innerText = 'заезд ' + checkIn.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+                    bookingCheckIn.value = formatShort(checkIn);
+                } else {
+                    selectedLabel.innerText = 'даты не выбраны';
+                }
+            }
+
+            searchDates.addEventListener('click', (e) => {
+                e.stopPropagation();
+                calendarPopup.style.display = 'block';
+                renderCalendar();
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!calendarPopup.contains(e.target) && e.target !== searchDates) {
+                    calendarPopup.style.display = 'none';
+                }
+            });
+
+            prevBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+                renderCalendar();
+            });
+
+            nextBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+                renderCalendar();
+            });
+
+            applyBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (checkIn && checkOut) {
+                    searchDates.value = formatShort(checkIn).slice(0,5) + ' — ' + formatShort(checkOut).slice(0,5);
+                    calendarPopup.style.display = 'none';
+                    showToast('Даты: ' + searchDates.value);
+                } else {
+                    showToast('Выберите заезд и выезд');
+                }
+            });
+
+            // ===== СЕЛЕКТОР ГОСТЕЙ =====
+            const searchGuests = document.getElementById('searchGuests');
+            const guestsDropdown = document.getElementById('guestsDropdown');
+            const adultCount = document.getElementById('adultCount');
+            const childCount = document.getElementById('childCount');
+            const adultMinus = document.getElementById('adultMinus');
+            const adultPlus = document.getElementById('adultPlus');
+            const childMinus = document.getElementById('childMinus');
+            const childPlus = document.getElementById('childPlus');
+            const guestsDone = document.getElementById('guestsDone');
+
+            let adults = 2;
+            let children = 0;
+
+            function updateGuestsDisplay() {
+                let text = adults + ' взросл';
+                if (adults % 10 === 1 && adults % 100 !== 11) text += 'ый';
+                else if (adults % 10 >= 2 && adults % 10 <= 4 && (adults % 100 < 10 || adults % 100 >= 20)) text += 'ых';
+                else text += 'ых';
+                
+                if (children > 0) {
+                    text += ', ' + children + ' ребен';
+                    if (children % 10 === 1 && children % 100 !== 11) text += 'ок';
+                    else if (children % 10 >= 2 && children % 10 <= 4 && (children % 100 < 10 || children % 100 >= 20)) text += 'ка';
+                    else text += 'ок';
+                }
+                searchGuests.value = text;
+            }
+
+            searchGuests.addEventListener('click', (e) => {
+                e.stopPropagation();
+                guestsDropdown.style.display = 'block';
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!guestsDropdown.contains(e.target) && e.target !== searchGuests) {
+                    guestsDropdown.style.display = 'none';
+                }
+            });
+
+            adultPlus.addEventListener('click', () => {
+                adults++;
+                adultCount.innerText = adults;
+            });
+            adultMinus.addEventListener('click', () => {
+                if (adults > 1) adults--;
+                adultCount.innerText = adults;
+            });
+            childPlus.addEventListener('click', () => {
+                children++;
+                childCount.innerText = children;
+            });
+            childMinus.addEventListener('click', () => {
+                if (children > 0) children--;
+                childCount.innerText = children;
+            });
+
+            guestsDone.addEventListener('click', () => {
+                updateGuestsDisplay();
+                guestsDropdown.style.display = 'none';
+                showToast('Гости: ' + searchGuests.value);
+            });
+
+            // ===== БРОНИРОВАНИЕ =====
+            const bookingPage = document.getElementById('bookingPage');
+            const bookingClose = document.getElementById('bookingClose');
+            const bookingTitle = document.getElementById('bookingTitle');
+            const bookingDetails = document.getElementById('bookingDetails');
+            const bookingTotal = document.getElementById('bookingTotalPrice');
+            const bookingConfirm = document.getElementById('bookingConfirm');
+
+            let currentBooking = { name: '', price: 0, type: '' };
+
+            function openBooking(card) {
+                const name = card.dataset.name;
+                const price = parseInt(card.dataset.price);
+                const type = card.dataset.type;
+                currentBooking = { name, price, type };
+                
+                bookingTitle.innerText = type === 'hotel' ? 'Бронирование отеля' : 'Экскурсия';
+                bookingDetails.innerHTML = `<div style="font-size:1.3rem; margin-bottom:10px;">${name}</div>`;
+                
+                let total = price;
+                if (type === 'hotel' && checkIn && checkOut) {
+                    const nights = Math.round((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+                    total = price * nights;
+                    bookingDetails.innerHTML += `<div>${nights} ночей × ${price} ₽ = ${total} ₽</div>`;
+                }
+                bookingTotal.innerText = total + ' ₽';
+                
+                bookingPage.style.display = 'flex';
+            }
+
+            document.querySelectorAll('.place-card, .hotel-card').forEach(card => {
+                card.addEventListener('click', () => openBooking(card));
+            });
+
+            bookingClose.addEventListener('click', () => bookingPage.style.display = 'none');
+            window.addEventListener('click', (e) => {
+                if (e.target === bookingPage) bookingPage.style.display = 'none';
+            });
+
+            bookingConfirm.addEventListener('click', () => {
+                showToast(`✅ Забронировано! ${currentBooking.name}, ${searchGuests.value}`);
+                bookingPage.style.display = 'none';
+            });
+
+            // ===== ОСТАЛЬНЫЕ КЛИКИ =====
+            document.getElementById('searchBtn').addEventListener('click', () => {
+                const dest = document.getElementById('searchDestination').value;
+                const dates = document.getElementById('searchDates').value;
+                const guests = document.getElementById('searchGuests').value;
+                showModal('Поиск', 'Ищем в ' + dest + ' с ' + dates + ', гостей: ' + guests);
+            });
+
+            const elements = {
+                logoHome: 'Главная страница',
+                navTours: 'Каталог туров',
+                navHotels: 'Все отели',
+                navReviews: 'Отзывы туристов',
+                navAbout: 'О районе Оленевка',
+                loginBtn: 'Вход / Регистрация (admin / olenevka2026)',
+                tabHotels: 'Режим: отели',
+                tabTours: 'Режим: туры',
+                tabFlights: 'Режим: авиабилеты',
+                allPlacesLink: 'Все достопримечательности',
+                allHotelsLink: 'Все 78 отелей',
+                footerAbout: 'О проекте',
+                footerAds: 'Реклама',
+                footerPartners: 'Партнерам',
+                footerCountries: 'Страны',
+                footerHotels: 'Каталог отелей',
+                footerTours: 'Экскурсии',
+                footerFaq: 'Вопрос-ответ',
+                footerSupport: 'Поддержка',
+                footerRules: 'Правила'
+            };
+
+            for (let id in elements) {
+                let el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        showModal(id, elements[id]);
+                    });
+                }
+            }
+
+            // Подсказка для направления
+            document.getElementById('searchDestination').addEventListener('click', () => showToast('Введите направление'));
+
+            showToast('✅ Выбор гостей работает!');
+        })();
+    </script>
+</body>
+</html>
